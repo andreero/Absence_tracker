@@ -1,0 +1,51 @@
+.chart-wrapper {
+  min-width: 1200px;
+  overflow: hidden;
+}
+
+.chart-wrapper .chart-header div {
+  min-width: 80px;
+}
+
+.chart-wrapper .chart-columns {
+  position: relative;
+  display: flex;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.chart-wrapper .chart-columns li {
+  min-width: 30px;
+  text-align: center;
+  position: relative;
+}
+
+.chart-wrapper .chart-columns li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  height: 10000px;
+  border-left: 1px solid lightgrey;
+}
+
+.chart-wrapper .chart-columns li:last-child:after {
+  content: '';
+  position: absolute;
+  right: 0;
+  height: 10000px;
+  border-left: 1px solid lightgrey;
+}
+
+/* CHART-BARS
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.chart-wrapper .chart-bars > li > div {
+    border-top: 1px solid lightgrey;
+}
+
+.chart-wrapper .chart-bars a.chart-bar {
+  position: relative;
+  padding: 1rem 0;
+  opacity: 0;
+  border-radius: 2px;
+}
+
