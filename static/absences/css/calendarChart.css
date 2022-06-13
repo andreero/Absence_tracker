@@ -1,3 +1,7 @@
+.hidden {
+    display:none;
+}
+
 .chart-wrapper {
   min-width: 1200px;
   overflow: hidden;
@@ -48,4 +52,3 @@
   opacity: 0;
   border-radius: 2px;
 }
-

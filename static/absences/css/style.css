@@ -749,6 +749,12 @@ select {
   width: 100%;
 }
 
+.w-min {
+  width: -webkit-min-content;
+  width: -moz-min-content;
+  width: min-content;
+}
+
 .w-auto {
   width: auto;
 }

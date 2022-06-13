@@ -11,9 +11,7 @@
     <a href="{% url 'absences:calendar_yearly' year=year|add:-1 %}" class="flex relative items-center px-4 py-2 text-base font-medium text-gray-700 hover:text-gray-900">
         ←  {{year|add:-1}}
     </a>
-
     <span class="flex relative items-center px-4 py-2 text-base font-medium text-gray-700 hover:text-gray-900 bg-gray-100 border border-gray-300 rounded-md">{{year}}</span>
-
     <a href="{% url 'absences:calendar_yearly' year=year|add:1 %}" class="flex relative items-center px-4 py-2 text-base font-medium text-gray-700 hover:text-gray-900">
         {{year|add:1}} →
     </a>
@@ -23,7 +21,11 @@
 
 <div class="mt-8 chart-wrapper px-4">
     <div class="flex chart-header w-full">
-        <div style="flex:2" class="flex h-8"></div>
+        <div style="flex:2" class="flex justify-end h-8">
+            <div class="mt-1 px-2 flex rounded-md">
+                <input id="searchName" type="text" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 border-gray-300 rounded-md" placeholder="Filter by name or email">
+            </div>
+        </div>
         <div style="flex:8" class="flex h-8">
               <ul class="chart-columns w-full">
                   {% for month in months %}
@@ -34,12 +36,12 @@
     </div>
 
 
-  <ul class="chart-bars mt-1">
+  <ul class="chart-bars mt-1" id="calendarRows">
       {% for absence_user in users %}
-      <li>
-          <div class="h-8 w-full flex">
+      <li data-user-name="{{absence_user.description}}" data-user-email="{{absence_user.username}}">
+          <div class="h-8 w-full flex" >
               <div style="flex:2" class="flex items-center justify-end">
-                  <a href="{% url 'accounts:profile' pk=absence_user.username %}" class="whitespace-nowrap text-base font-medium text-gray-700 hover:text-gray-900 px-4">{{absence_user.description}}</a>
+                  <a href="{% url 'accounts:profile' pk=absence_user.username %}" class="whitespace-nowrap text-base font-medium text-indigo-700 hover:text-indigo-900 px-4">{{absence_user.description}}</a>
               </div>
               <div style="flex:8" class="flex">
                   {% for absence in absence_user.user_absences.all %}

@@ -55,8 +55,6 @@ function createChart(e) {
             startShare = Math.floor((startDate.getTime() - new Date(urlYear, 0, 0).getTime()) / 86400000) - 1;
             endShare = Math.floor((endDate.getTime() - new Date(urlYear, 0, 0).getTime()) / 86400000);
         }
-        console.log(monthlyView, calendarLength, startShare, endShare, urlYear, urlMonth)
-        console.log(new Date(urlYear, urlMonth, 0))
 
 
         if (startShare < 0) {
@@ -70,10 +68,8 @@ function createChart(e) {
         } else if (endShare > calendarLength) {
             endShare = calendarLength;
         }
-        console.log(monthlyView, calendarLength, startShare, endShare, urlYear, urlMonth)
 
         let left = chartLeft + Math.floor(chartWidth*startShare/calendarLength);
-//        let width = Math.ceil(chartWidth*(endShare-startShare)/calendarLength);
         let width = chartLeft + Math.ceil(chartWidth*endShare/calendarLength) - left;
 
         // apply css
@@ -100,5 +96,39 @@ function createChart(e) {
   });
 }
 
+function addSearch(){
+    const searchName = document.getElementById("searchName");
+
+    if (searchName) {
+      searchName.addEventListener("input", event => {
+        if (event.target.value) {
+          // Normalize the search term.
+          const value = event.target.value.toLowerCase();
+          console.log(value);
+
+          // Hide all non matching elements.
+          document
+            .querySelectorAll(`#calendarRows li:not([data-user-name*="${value}" i][data-user-email*="${value}" i])`)
+            .forEach(item => {
+              item.classList.add("hidden");
+            });
+
+          // Show all matching elements.
+          document.querySelectorAll(`#calendarRows li[data-user-name*="${value}" i], #calendarRows li[data-user-email*="${value}" i]`)
+          .forEach(item => {
+            item.classList.remove("hidden");
+          });
+        } else {
+          // If there are no search terms, show all elements.
+          document.querySelectorAll(`#calendarRows li`).forEach(item => {
+            item.classList.remove("hidden");
+          });
+        }
+      });
+    }
+}
+
+
 window.addEventListener("load", createChart);
+window.addEventListener("load", addSearch);
 window.addEventListener("resize", createChart);
