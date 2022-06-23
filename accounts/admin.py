@@ -42,7 +42,7 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('username', 'password', 'description', 'is_superuser')
+        fields = ('username', 'password', 'description', 'is_superuser', 'is_deleted')
 
 
 class UserAdmin(BaseUserAdmin):
@@ -59,6 +59,7 @@ class UserAdmin(BaseUserAdmin):
         (None, {'fields': ('username', 'password')}),
         ('Personal info', {'fields': ('description',)}),
         ('Permissions', {'fields': ('is_superuser',)}),
+        ('Status', {'fields': ('is_deleted',)}),
     )
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
     # overrides get_fieldsets to use this attribute when creating a user.
@@ -73,6 +74,7 @@ class UserAdmin(BaseUserAdmin):
     filter_horizontal = ()
 
 
+admin.site.unregister(User)
 # Now register the new UserAdmin...
 admin.site.register(User, UserAdmin)
 # ... and, since we're not using Django's built-in permissions,

@@ -3,13 +3,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.views.generic import UpdateView, CreateView, DetailView, ListView
 from .models import Absence, ApprovalStatus
-from .forms import AbsenceRequestForm
 from accounts.models import User
 from django.db.models import Prefetch
 import datetime
 from django.db.models import Q
 import calendar
 from collections import namedtuple
+from django.contrib.auth import get_user_model
 
 
 def get_month_names_and_lengths(year):
@@ -37,7 +37,6 @@ def next_month(year, month):
         return year+1, 1
     else:
         return year, month+1
-
 
 
 # Create your views here.
@@ -106,7 +105,7 @@ class PendingAbsenceRequestsView(LoginRequiredMixin, ListView):
 
 
 class CalendarYearlyView(LoginRequiredMixin, ListView):
-    model = User
+    model = get_user_model()
     template_name = 'absences/yearly_calendar.html'
 
     def get_queryset(self):
@@ -153,7 +152,7 @@ class CalendarYearlyView(LoginRequiredMixin, ListView):
 
 
 class CalendarMonthlyView(LoginRequiredMixin, ListView):
-    model = User
+    model = get_user_model()
     template_name = 'absences/monthly_calendar.html'
 
     def get_queryset(self):

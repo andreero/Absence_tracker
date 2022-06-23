@@ -1,19 +1,23 @@
 from django.contrib.auth import get_user_model
 from .forms import SignUpForm, LoginForm
-from django.views.generic import CreateView, DetailView
+from django.views.generic import CreateView, DetailView, ListView
 from django.urls import reverse_lazy
 from django.contrib.auth.views import LoginView
+from django.contrib.auth.mixins import UserPassesTestMixin
 
 
 # Create your views here.
-class SignUpView(CreateView):
+class SignUpView(UserPassesTestMixin, CreateView):
     form_class = SignUpForm
-    success_url = reverse_lazy('accounts:login')
+    success_url = reverse_lazy('accounts:users')
     template_name = 'accounts/signup.html'
     model = get_user_model()
 
     def form_valid(self, form):
         return super().form_valid(form)
+
+    def test_func(self):
+        return self.request.user.is_superuser
 
 
 class CustomLoginView(LoginView):
@@ -27,3 +31,9 @@ class ProfileView(DetailView):
     context_object_name = 'profile'
     slug_url_kwarg = 'username'
     slug_field = 'username'
+
+
+class ProfileListView(ListView):
+    model = get_user_model()
+    template_name = 'accounts/users_list.html'
+    context_object_name = 'profiles'

@@ -1,16 +1,16 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
-from django.utils import timezone
 from django.shortcuts import reverse
 from datetime import date
 import uuid
+from django_softdelete.models import SoftDeleteModel, SoftDeleteManager
 
 
 # Create your models here.
-class UserManager(BaseUserManager):
+class UserManager(SoftDeleteManager, BaseUserManager):
     def create_user(self, username, description, password=None, user_id=None, is_superuser=False):
         if not username:
-            raise ValueError("User must have an username")
+            raise ValueError("User must have a email")
         if not password:
             raise ValueError("User must have a password")
         if not description:
@@ -27,6 +27,8 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, username, description, user_id=None, password=None):
+        if user_id is None:
+            user_id = uuid.uuid4()
         user = self.create_user(
             username=username,
             description=description,
@@ -36,12 +38,15 @@ class UserManager(BaseUserManager):
         )
         return user
 
+    def get_by_natural_key(self, username):
+        return User.objects.get(username=username)
 
-class User(AbstractUser):
-    # user_id = models.UUIDField(default=uuid.uuid4, db_column='USR_COD')
-    username = models.EmailField(primary_key=True, unique=True, max_length=255, db_column='USR_EML')
+
+class User(SoftDeleteModel, AbstractUser):
+    username = models.EmailField(verbose_name='User email', max_length=255, primary_key=True, unique=True, db_column='USR_EML')
+    user_id = models.UUIDField(default=uuid.uuid4, db_column='USR_COD')
     description = models.CharField(max_length=255, db_column='USR_NAM', blank=True)
-    # country_code = models.CharField(max_length=3, db_column='CRY_COD', blank=True)
+    country_code = models.CharField(max_length=3, db_column='CRY_COD', blank=True, default='RUS')
     date_joined = models.DateField(default=date.today, db_column='ENT_DAT')
     is_superuser = models.BooleanField(default=False, db_column='ADM_FLG')
     absence_limit = models.IntegerField(default=0, db_column='ABS_LMT')
@@ -51,13 +56,12 @@ class User(AbstractUser):
     updated_at = models.DateTimeField(auto_now=True, db_column='T_REC_UPD_TST')
     deleted_at = models.DateTimeField(db_column='T_REC_SRC_TST', null=True)
 
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['description']
+    USERNAME_FIELD = 'username'
     objects = UserManager()
-
-    # prevent default columns from being created
+    email = None
     first_name = None
     last_name = None
-    email = None
 
     def get_absolute_url(self):
         return reverse(
@@ -80,4 +84,3 @@ class User(AbstractUser):
 
     class Meta:
         db_table = 'R_USR'
-

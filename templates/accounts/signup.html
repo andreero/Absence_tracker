@@ -12,11 +12,11 @@
       {% csrf_token %}
 
         <div>
-            <label for="username" class="block text-sm font-medium text-gray-700">Email address</label>
+            <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
             <div class="mt-1 relative rounded-md shadow-sm">
-              <input id="username" name="username" type="email" autocomplete="email" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="Email address">
+              <input id="email" name="email" type="email" autocomplete="email" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="Email address">
             </div>
-            {% if form.username.errors %}<span class="text-sm font-medium text-red-600">{{ form.username.errors.as_text }}</span>{% endif %}
+            {% if form.email.errors %}<span class="text-sm font-medium text-red-600">{{ form.email.errors.as_text }}</span>{% endif %}
         </div>
 
         <div>

@@ -1,3 +1,6 @@
-django
-gunicorn
-django-heroku
+Django==4.0.5
+django-heroku==0.3.1
+django-microsoft-auth==2.4.1
+django-soft-delete==0.9.3
+gunicorn==20.1.0
+psycopg2==2.9.3

@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.shortcuts import reverse
 from datetime import timedelta
+from django_softdelete.models import SoftDeleteModel
 
 
 # Create your models here.
@@ -21,7 +22,7 @@ class ApprovalStatus(models.IntegerChoices):
 #     description = models.CharField(max_length=255, db_column='APR_STS_DSC')
 
 
-class Absence(models.Model):
+class Absence(SoftDeleteModel, models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_column='USR_EML',
                              related_name='user_absences')
     absence_id = models.AutoField(db_column='ABS_BCK_COD', primary_key=True)
@@ -59,7 +60,7 @@ class Absence(models.Model):
         self.save()
 
 
-class ApprovalFlow(models.Model):
+class ApprovalFlow(SoftDeleteModel, models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_column='USR_EML')
     approval_step = models.PositiveSmallIntegerField(db_column='APR_STP')
     approval_user_email = models.EmailField(db_column='APR_USR_EML')
@@ -76,7 +77,7 @@ class ApprovalFlow(models.Model):
         ]
 
 
-class AbsenceApprovalFlowStatus(models.Model):
+class AbsenceApprovalFlowStatus(SoftDeleteModel, models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_column='USR_EML')
     absence = models.ForeignKey(ApprovalFlow, on_delete=models.CASCADE)
     approval_status_code = models.PositiveSmallIntegerField(
