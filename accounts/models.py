@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.shortcuts import reverse
 from datetime import date
 import uuid
@@ -42,7 +42,7 @@ class UserManager(SoftDeleteManager, BaseUserManager):
         return User.objects.get(username=username)
 
 
-class User(SoftDeleteModel, AbstractUser):
+class User(SoftDeleteModel, AbstractBaseUser):
     username = models.EmailField(verbose_name='User email', max_length=255, primary_key=True, unique=True, db_column='USR_EML')
     user_id = models.UUIDField(default=uuid.uuid4, db_column='USR_COD')
     description = models.CharField(max_length=255, db_column='USR_NAM', blank=True)
@@ -59,9 +59,6 @@ class User(SoftDeleteModel, AbstractUser):
     REQUIRED_FIELDS = ['description']
     USERNAME_FIELD = 'username'
     objects = UserManager()
-    email = None
-    first_name = None
-    last_name = None
 
     def get_absolute_url(self):
         return reverse(
@@ -81,6 +78,16 @@ class User(SoftDeleteModel, AbstractUser):
     @property
     def is_admin(self):
         return self.is_superuser
+
+    def has_perm(self, perm, obj=None):
+        """Does the user have a specific permission?"""
+        # Simplest possible answer: Yes, always
+        return True
+
+    def has_module_perms(self, app_label):
+        """Does the user have permissions to view the app `app_label`?"""
+        # Simplest possible answer: Yes, always
+        return True
 
     class Meta:
         db_table = 'R_USR'

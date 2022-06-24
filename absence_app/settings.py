@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-72^e_x+eo29iu+qi#r!z)smn99rly42*dtw0o-k4mt_e^m4ycw
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -38,8 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.sites',
-    'microsoft_auth',
+    'microsoft_authentication',
     'django_softdelete',
     'accounts',
     'absences',
@@ -69,7 +68,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'microsoft_auth.context_processors.microsoft',
             ],
             'loaders': [
                 'django.template.loaders.filesystem.Loader',
@@ -117,7 +115,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    'microsoft_auth.backends.MicrosoftAuthenticationBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
 
@@ -126,10 +123,15 @@ MICROSOFT_AUTH_CLIENT_SECRET = 'NA18Q~gfbkn_0pJB3hqi6Z~Y1OUrLrd3vSFLDaEs'
 # Tenant ID is also needed for single tenant applications
 # MICROSOFT_AUTH_TENANT_ID = 'your-tenant-id-from-apps.dev.microsoft.com'
 
-MICROSOFT_AUTH_LOGIN_TYPE = 'ma'
-MICROSOFT_AUTH_AUTO_CREATE = False
-MICROSOFT_AUTH_REGISTER_INACTIVE_ADMIN = False
-
+MICROSOFT = {
+    "app_id": "5f9f7319-dd98-45cc-bd18-008ff63da43c",
+    "app_secret": "NA18Q~gfbkn_0pJB3hqi6Z~Y1OUrLrd3vSFLDaEs",
+    "redirect": "http://localhost:8000/microsoft_authentication/callback",
+    "scopes": ["user.read"],
+    "authority": "https://login.microsoftonline.com/common",  # or using tenant "https://login.microsoftonline.com/{tenant}",
+    "valid_email_domains": ["yandex.ru"],
+    "logout_uri": "http://localhost:8000/admin/logout"
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
@@ -155,9 +157,9 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'), )
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'accounts.User'
-SITE_ID = 1
-LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = "/microsoft_authentication/login"
 
 # Configure Django App for Heroku.
 import django_heroku
