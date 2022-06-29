@@ -24,9 +24,9 @@
             <a href="{% url 'absences:calendar' %}" class="text-base font-medium text-gray-500 hover:text-gray-900"> Calendar </a>
             <a href="{% url 'absences:request_absence' %}" class="text-base font-medium text-gray-500 hover:text-gray-900"> Request Absence </a>
             {% if user.is_superuser %}
-            <a href="#" class="text-base font-medium text-gray-500 hover:text-gray-900"> Users </a>
-            <a href="#" class="text-base font-medium text-gray-500 hover:text-gray-900"> Approval flow </a>
-            <a href="{% url 'absences:pending_absence_requests' %}" class="text-base font-medium text-gray-500 hover:text-gray-900"> Pending absense requests </a>
+                <a href="{% url 'accounts:register' %}" class="text-base font-medium text-gray-500 hover:text-gray-900"> Register a new user </a>
+                <a href="#" class="text-base font-medium text-gray-500 hover:text-gray-900"> Approval flow </a>
+                <a href="{% url 'absences:pending_absence_requests' %}" class="text-base font-medium text-gray-500 hover:text-gray-900"> Pending absense requests </a>
             {% endif %}
         </nav>
 
@@ -35,9 +35,7 @@
             <a href="{% url 'accounts:profile' pk=user.username %}" class="ml-8 inline-flex whitespace-nowrap text-base font-medium text-gray-500 hover:text-gray-900"> My profile </a>
             <a href="{% url 'accounts:logout' %}" class="ml-8 inline-flex whitespace-nowrap text-base font-medium text-gray-500 hover:text-gray-900"> Log out </a>
           {% else %}
-            <a href="{% url 'accounts:login' %}" class="ml-8 whitespace-nowrap text-base font-medium text-gray-500 hover:text-gray-900"> Log in with password </a>
-            <a href="{% url 'microsoft_authentication:microsoft_authentication_login' %}" class="ml-8 whitespace-nowrap text-base font-medium text-gray-500 hover:text-gray-900"> Log in with Microsoft </a>
-<!--            <a href="{% url 'accounts:register' %}" class="ml-8 whitespace-nowrap inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700"> Register </a>-->
+            <a href="{% url 'accounts:login' %}" class="ml-8 whitespace-nowrap text-base font-medium text-gray-500 hover:text-gray-900"> Sign in </a>
           {% endif %}
       </div>
     </div>

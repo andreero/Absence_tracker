@@ -6,6 +6,40 @@
 <script src="{% static 'absences/js/calendarChart.js' %}"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'absences/css/calendarChart.css' %}">
 
+<form method="get" class="mt-8 flex px-4 space-x-10 pb-4 border-b-2 border-gray-100">
+    <div>
+        <span class="text-xl font-bold text-gray-900">Filters:</span>
+    </div>
+    <div>
+        <label for="filter_email" class="block text-sm font-medium text-gray-700">Email</label>
+        <div class="mt-1 relative rounded-md shadow-sm">
+          <input id="filter_email" name="username" type="text" autocomplete="email" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="Email address">
+        </div>
+        {% if filter_email.errors %}<span class="text-sm font-medium text-red-600">{{ filter_email.errors.as_text }}</span>{% endif %}
+    </div>
+    <div>
+        <label for="filter_description" class="block text-sm font-medium text-gray-700">Name</label>
+        <div class="mt-1 relative rounded-md shadow-sm">
+          <input id="filter_description" name="description" type="text" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="Name">
+        </div>
+        {% if filter_description.errors %}<span class="text-sm font-medium text-red-600">{{ filter_description.errors.as_text }}</span>{% endif %}
+    </div>
+    <div>
+        <label for="country_code" class="block text-sm font-medium text-gray-700">Country</label>
+        <div class="mt-1 relative rounded-md shadow-sm">
+            {{ filter.form.country_code }}
+        </div>
+    </div>
+    <div>
+        <div class="mt-1 relative">
+            <button type="submit" class="group h-10 mt-4 relative align-middle justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Apply filter
+            </button>
+        </div>
+    </div>
+</form>
+
+
 <div class="flex justify-center my-4 pb-4 border-b-2 border-gray-100">
   <nav class="flex space-x-10">
     <a href="{% url 'absences:calendar_yearly' year=year|add:-1 %}" class="flex relative items-center px-4 py-2 text-base font-medium text-gray-700 hover:text-gray-900">
@@ -18,13 +52,9 @@
   </nav>
 </div>
 
-
 <div class="mt-8 chart-wrapper px-4">
     <div class="flex chart-header w-full">
         <div style="flex:2" class="flex justify-end h-8">
-            <div class="mt-1 px-2 flex rounded-md">
-                <input id="searchName" type="text" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 border-gray-300 rounded-md" placeholder="Filter by name or email">
-            </div>
         </div>
         <div style="flex:8" class="flex h-8">
               <ul class="chart-columns w-full">

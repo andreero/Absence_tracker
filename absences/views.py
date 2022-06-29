@@ -2,14 +2,14 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.views.generic import UpdateView, CreateView, DetailView, ListView
-from .models import Absence, ApprovalStatus
-from accounts.models import User
+from .models import Absence, ApprovalStatus, AbsenceApprovalFlowStatus
 from django.db.models import Prefetch
 import datetime
 from django.db.models import Q
 import calendar
 from collections import namedtuple
 from django.contrib.auth import get_user_model
+from .filters import CalendarFilter
 
 
 def get_month_names_and_lengths(year):
@@ -61,11 +61,6 @@ class AbsenceRequestEditView(LoginRequiredMixin, UpdateView):
     fields = ['start_date', 'end_date', 'user_comment']
     template_name = 'absences/absence_edit_form.html'
 
-    def get_initial(self):
-        initial = super().get_initial()
-        print(initial)
-        return initial
-
 
 class AbsenceView(LoginRequiredMixin, DetailView):
     model = Absence
@@ -76,31 +71,46 @@ class AbsenceView(LoginRequiredMixin, DetailView):
         absence = super().get_object(queryset=queryset)
         return absence
 
+    def get_absence_approval_flow_status(self, absence):
+        approval_flow_status = absence.approval_flow_statuses.filter(approval_flow__approver=self.request.user).first()
+        return approval_flow_status
+
     def get(self, request, *args, **kwargs):
         absence = self.get_object()
-        return render(request, template_name=self.template_name, context={self.context_object_name: absence})
+        context = {self.context_object_name: absence}
+        current_approval_flow = self.get_absence_approval_flow_status(absence=absence)
+        if current_approval_flow:
+            context['current_approval_flow'] = current_approval_flow
+        return render(request, template_name=self.template_name,
+                      context=context)
 
 
 class AbsenceResolveView(LoginRequiredMixin, View):
-    model = Absence
+    model = AbsenceApprovalFlowStatus
     template_name = 'absences/absence.html'
 
     def post(self, request, *args, **kwargs):
-        absence = self.model.objects.get(pk=self.kwargs.get('pk'))
+        approval_flow_status = self.model.objects.get(pk=self.kwargs.get('pk'))
         if request.method == 'POST' and 'approve' in request.POST:
-            absence.approve()
+            approval_flow_status.approve()
         if request.method == 'POST' and 'reject' in request.POST:
-            absence.reject()
-        return redirect(absence)
+            approval_flow_status.reject()
+        return redirect(approval_flow_status.absence)
 
 
 class PendingAbsenceRequestsView(LoginRequiredMixin, ListView):
     model = Absence
     template_name = 'absences/pending_requests.html'
 
+    def get_queryset(self):
+        queryset = AbsenceApprovalFlowStatus.objects.filter(
+            approval_status_code=0, approval_flow__approver=self.request.user).order_by('created_at')
+        return queryset
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['pending_requests'] = Absence.objects.filter(approval_status_code=0).order_by('created_at')
+        pending_requests = self.get_queryset()
+        context['pending_requests'] = pending_requests
         return context
 
 
@@ -131,16 +141,19 @@ class CalendarYearlyView(LoginRequiredMixin, ListView):
             # Select absences that happen to fall on that year, but only approved absences are selected for other users
             other_users_absences_queryset = approved_yearly_absences_queryset
 
-        current_user_absences = User.objects.filter(
+        current_user_absences = self.model.objects.filter(
             username=self.request.user.username
         ).prefetch_related(
             Prefetch('user_absences', queryset=all_yearly_absences_queryset))
 
-        other_users_absences = User.objects.filter(
+        other_users_absences = self.model.objects.filter(
             ~Q(username=self.request.user.username)
         ).prefetch_related(
             Prefetch('user_absences', queryset=other_users_absences_queryset))
-        return list(current_user_absences) + list(other_users_absences)
+
+        all_user_absences_queryset = current_user_absences | other_users_absences
+        filtered_queryset = CalendarFilter(self.request.GET, queryset=all_user_absences_queryset).qs
+        return filtered_queryset
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -148,6 +161,7 @@ class CalendarYearlyView(LoginRequiredMixin, ListView):
         year = self.kwargs.get('year', datetime.datetime.today().year)
         context['year'] = year
         context['months'] = get_month_names_and_lengths(year=year)
+        context['filter'] = CalendarFilter(self.request.GET, queryset=self.model.objects.all())
         return context
 
 
@@ -179,16 +193,19 @@ class CalendarMonthlyView(LoginRequiredMixin, ListView):
             # Select absences that happen to fall on that year, but only approved absences are selected for other users
             other_users_absences_queryset = approved_yearly_absences_queryset
 
-        current_user_absences = User.objects.filter(
+        current_user_absences = self.model.objects.filter(
             username=self.request.user.username
         ).prefetch_related(
             Prefetch('user_absences', queryset=all_yearly_absences_queryset))
 
-        other_users_absences = User.objects.filter(
+        other_users_absences = self.model.objects.filter(
             ~Q(username=self.request.user.username)
         ).prefetch_related(
             Prefetch('user_absences', queryset=other_users_absences_queryset))
-        return list(current_user_absences) + list(other_users_absences)
+
+        all_user_absences_queryset = current_user_absences | other_users_absences
+        filtered_queryset = CalendarFilter(self.request.GET, queryset=all_user_absences_queryset).qs
+        return filtered_queryset
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -210,4 +227,5 @@ class CalendarMonthlyView(LoginRequiredMixin, ListView):
             'year': prev_month_year,
             'title': datetime.date(prev_month_year, prev_month_month, 1).strftime('%B %Y')
         }
+        context['filter'] = CalendarFilter(self.request.GET, queryset=self.model.objects.all())
         return context

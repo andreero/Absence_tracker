@@ -5,7 +5,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.core.exceptions import ValidationError
 
-from .models import User
+from .models import User, Country
 
 
 class UserCreationForm(forms.ModelForm):
@@ -14,7 +14,7 @@ class UserCreationForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('username', 'description', 'is_superuser')
+        fields = ('username', 'description', 'country_code', 'is_superuser')
 
     def clean_password2(self):
         # Check that the two password entries match
@@ -42,7 +42,7 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('username', 'password', 'description', 'is_superuser', 'is_deleted')
+        fields = ('username', 'password', 'description', 'country_code', 'is_superuser', 'is_deleted')
 
 
 class UserAdmin(BaseUserAdmin):
@@ -57,7 +57,7 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ('is_superuser',)
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('description',)}),
+        ('Personal info', {'fields': ('description', 'country_code',)}),
         ('Permissions', {'fields': ('is_superuser',)}),
         ('Status', {'fields': ('is_deleted',)}),
     )
@@ -73,6 +73,9 @@ class UserAdmin(BaseUserAdmin):
     ordering = ('username',)
     filter_horizontal = ()
 
+    def get_queryset(self, request):
+        return self.model.global_objects
+
 
 # admin.site.unregister(User)
 # # Now register the new UserAdmin...
@@ -80,3 +83,4 @@ admin.site.register(User, UserAdmin)
 # # ... and, since we're not using Django's built-in permissions,
 # # unregister the Group model from admin.
 # admin.site.unregister(Group)
+admin.site.register(Country)

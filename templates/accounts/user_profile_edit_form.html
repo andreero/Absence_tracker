@@ -5,49 +5,41 @@
 <div class="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
   <div class="max-w-md w-full space-y-8">
     <div>
-      <h2 class="mt-6 text-center text-3xl font-bold text-gray-900">Register a new account</h2>
+      <h2 class="mt-6 text-center text-3xl font-bold text-gray-900">Edit account {{form.username.initial}}</h2>
     </div>
 
     <form class="mt-8 space-y-6" action="#" method="POST">
       {% csrf_token %}
 
         <div>
-            <label for="username" class="block text-sm font-medium text-gray-700">Email address</label>
+            <label for="user_id" class="block text-sm font-medium text-gray-700">User UUID</label>
             <div class="mt-1 relative rounded-md shadow-sm">
-              <input id="username" name="username" type="email" autocomplete="email" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="Email address">
+              <input id="user_id" name="user_id" type="text" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="UUID" value="{{form.user_id.initial}}">
             </div>
-            {% if form.username.errors %}<span class="text-sm font-medium text-red-600">{{ form.username.errors.as_text }}</span>{% endif %}
-        </div>
-
-        <div>
-            <label for="password1" class="block text-sm font-medium text-gray-700">Password</label>
-            <div class="mt-1 relative rounded-md shadow-sm">
-                <input id="password1" name="password1" type="password" autocomplete="new-password" required class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="Password">
-            </div>
-            {% if form.password1.errors %}<span class="text-sm font-medium text-red-600">{{ form.password1.errors.as_text }}</span>{% endif %}
-        </div>
-
-        <div>
-            <label for="password2" class="block text-sm font-medium text-gray-700">Repeat password</label>
-            <div class="mt-1 relative rounded-md shadow-sm">
-                <input id="password2" name="password2" type="password" autocomplete="new-password" required class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="Repeat password">
-            </div>
-            {% if form.password2.errors %}<span class="text-sm font-medium text-red-600">{{ form.password2.errors.as_text }}</span>{% endif %}
+            {% if form.user_id.errors %}<span class="text-sm font-medium text-red-600">{{ form.user_id.errors.as_text }}</span>{% endif %}
         </div>
 
         <div>
             <label for="description" class="block text-sm font-medium text-gray-700">Description (name and surname)</label>
             <div class="mt-1 relative rounded-md shadow-sm">
-              <input id="description" name="description" type="text" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="Description">
+              <input id="description" name="description" type="text" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="Description" value="{{form.description.initial}}">
             </div>
             {% if form.description.errors %}<span class="text-sm font-medium text-red-600">{{ form.description.errors.as_text }}</span>{% endif %}
+        </div>
+
+        <div class="datepicker relative form-floating">
+          <label for="date_joined" class="text-gray-700">Date joined</label>
+            <input id="date_joined" name="date_joined" type="date"
+              class="form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+              placeholder="Date joined" value="{{ form.date_joined.initial|date:'Y-m-d'}}"/>
+            {% if form.date_joined.errors %}<span class="text-sm font-medium text-red-600">{{ form.date_joined.errors.as_text }}</span>{% endif %}
         </div>
 
         <div>
             <label for="country_code" class="block text-sm font-medium text-gray-700">Country</label>
             <select id="country_code" name="country_code" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md">
                 {% for id, name in form.country_code.field.choices %}
-                  <option value="{{id}}">{{name}}</option>
+                  <option value="{{id}}" {% if form.country_code.initial == id %} selected {% endif %}>{{name}}</option>
                 {% endfor %}
             </select>
             {% if form.country_code.errors %}<span class="text-sm font-medium text-red-600">{{ form.country_code.errors.as_text }}</span>{% endif %}
@@ -55,7 +47,7 @@
 
         <div class="flex items-center justify-between">
             <div class="flex items-center">
-              <input id="is_superuser" name="is_superuser" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+              <input id="is_superuser" name="is_superuser" type="checkbox" {% if form.is_superuser.initial %} checked {% endif %} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
               <label for="is_superuser" class="ml-2 block text-sm text-gray-900"> Admin account </label>
             </div>
             {% if form.is_superuser.errors %}<span class="text-sm font-medium text-red-600">{{ form.is_superuser.errors.as_text }}</span>{% endif %}
@@ -67,7 +59,7 @@
 
         <div>
         <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-          Register
+          Submit edit
         </button>
       </div>
     </form>

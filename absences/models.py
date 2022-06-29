@@ -3,6 +3,7 @@ from django.conf import settings
 from django.shortcuts import reverse
 from datetime import timedelta
 from django_softdelete.models import SoftDeleteModel
+from django.db.models import Q
 
 
 # Create your models here.
@@ -40,7 +41,8 @@ class Absence(SoftDeleteModel, models.Model):
     deleted_at = models.DateTimeField(db_column='T_REC_SRC_TST', null=True, blank=True)
 
     def __str__(self):
-        return f'{self.user.description} ({self.user.username}) absence from {self.start_date} to {self.end_date}'
+        deleted = '<deleted> ' if self.is_deleted else ''
+        return f'{deleted}{self.user.description} ({self.user.username}) absence from {self.start_date} to {self.end_date}'
 
     def is_editable_by_user(self):
         return self.approval_status_code == ApprovalStatus.NOT_APPROVED
@@ -51,35 +53,89 @@ class Absence(SoftDeleteModel, models.Model):
     def get_duration(self):
         return (self.end_date - self.start_date + timedelta(days=1)).days
 
-    def approve(self):
-        self.approval_status_code = ApprovalStatus.APPROVED
-        self.save()
+    def save(self, *args, **kwargs):
+        created = not self.pk  # Status objects are created only on the initial save
+        super().save(*args, **kwargs)
+        if created:
+            for flow in self.user.requester_flows.all():
+                AbsenceApprovalFlowStatus.objects.create(
+                    user=self.user, absence=self, approval_flow=flow,
+                    approval_comment='', approval_status_code=ApprovalStatus.NOT_APPROVED)
+
+
+class ApprovalFlow(SoftDeleteModel, models.Model):
+    requester = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                  on_delete=models.CASCADE, db_column='USR_EML', related_name='requester_flows')
+    approval_step = models.PositiveSmallIntegerField(db_column='APR_STP')
+    approver = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                 on_delete=models.CASCADE, db_column='APR_USR_EML', related_name='approver_flows')
+    notification_email_list = models.EmailField(db_column='NTF_EML_LST', null=True, blank=True)
+
+    is_deleted = models.BooleanField(default=False, db_column='T_REC_DLT_FLG')
+    created_at = models.DateTimeField(auto_now_add=True, db_column='T_REC_INS_TST')
+    updated_at = models.DateTimeField(auto_now=True, db_column='T_REC_UPD_TST')
+    deleted_at = models.DateTimeField(db_column='T_REC_SRC_TST', null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['requester', 'approval_step'],
+                                    condition=Q(is_deleted=False), name='unique_approval_flow'),
+        ]
+
+    def __str__(self):
+        deleted = '<deleted> ' if self.is_deleted else ''
+        return f'{deleted}approval step #{self.approval_step} for {self.requester} by approver {self.approver}'
+
+
+class AbsenceApprovalFlowStatus(SoftDeleteModel, models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_column='USR_EML')
+    absence = models.ForeignKey(
+        Absence, on_delete=models.CASCADE, db_column='ABS_BCK_COD', related_name='approval_flow_statuses')
+    approval_flow = models.ForeignKey(ApprovalFlow, on_delete=models.CASCADE, db_column='APR_FLW')
+    approval_status_code = models.PositiveSmallIntegerField(
+        choices=ApprovalStatus.choices, default=ApprovalStatus.NOT_APPROVED, db_column='APR_STS_COD')
+    approval_comment = models.TextField(db_column='APR_CMT', blank=True)
+
+    is_deleted = models.BooleanField(default=False, db_column='T_REC_DLT_FLG')
+    created_at = models.DateTimeField(auto_now_add=True, db_column='T_REC_INS_TST')
+    updated_at = models.DateTimeField(auto_now=True, db_column='T_REC_UPD_TST')
+    deleted_at = models.DateTimeField(db_column='T_REC_SRC_TST', null=True, blank=True)
+
+    def __str__(self):
+        deleted = '<deleted> ' if self.is_deleted else ''
+        return f'{deleted}approval flow status [{self.approval_flow}] for absence [{self.absence}], ' \
+               f'status {self.approval_status_code}'
 
     def reject(self):
         self.approval_status_code = ApprovalStatus.REJECTED
         self.save()
 
+        self.absence.approval_status_code = ApprovalStatus.REJECTED
+        self.absence.save()
 
-class ApprovalFlow(SoftDeleteModel, models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_column='USR_EML')
-    approval_step = models.PositiveSmallIntegerField(db_column='APR_STP')
-    approval_user_email = models.EmailField(db_column='APR_USR_EML')
-    notification_email_list = models.EmailField(db_column='NTF_EML_LST')
+        current_step_number = self.approval_flow.approval_step
+        following_approval_flow_steps = self.absence.approval_flow_statuses\
+            .filter(approval_flow__approval_step__gt=current_step_number)
+        for following_flow_step in following_approval_flow_steps:
+            following_flow_step.approval_status_code = ApprovalStatus.REJECTED
+            following_flow_step.save()
 
-    is_deleted = models.BooleanField(default=False, db_column='T_REC_DLT_FLG')
-    created_at = models.DateTimeField(auto_now_add=True, db_column='T_REC_INS_TST')
-    updated_at = models.DateTimeField(auto_now=True, db_column='T_REC_UPD_TST')
-    deleted_at = models.DateTimeField(db_column='T_REC_SRC_TST')
+    def approve(self):
+        self.approval_status_code = ApprovalStatus.APPROVED
+        self.save()
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['user', 'approval_step'], name='unique_approval_flow'),
-        ]
+        current_step_number = self.approval_flow.approval_step
+        previous_approval_flow_steps = self.absence.approval_flow_statuses\
+            .filter(approval_flow__approval_step__lt=current_step_number)
 
+        for previous_flow_step in previous_approval_flow_steps:
+            previous_flow_step.approval_status_code = ApprovalStatus.APPROVED
+            previous_flow_step.save()
 
-class AbsenceApprovalFlowStatus(SoftDeleteModel, models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_column='USR_EML')
-    absence = models.ForeignKey(ApprovalFlow, on_delete=models.CASCADE)
-    approval_status_code = models.PositiveSmallIntegerField(
-        choices=ApprovalStatus.choices, default=ApprovalStatus.NOT_APPROVED, db_column='APR_STS_COD')
-    approval_comment = models.TextField(db_column='APR_CMT')
+        following_approval_flow_steps = self.absence.approval_flow_statuses\
+            .filter(approval_flow__approval_step__gt=current_step_number)
+        if following_approval_flow_steps.exists():
+            self.absence.approval_status_code = ApprovalStatus.IN_PROGRESS
+        else:
+            self.absence.approval_status_code = ApprovalStatus.APPROVED
+        self.absence.save()
