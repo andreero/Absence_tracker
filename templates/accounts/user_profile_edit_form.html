@@ -27,6 +27,14 @@
             {% if form.description.errors %}<span class="text-sm font-medium text-red-600">{{ form.description.errors.as_text }}</span>{% endif %}
         </div>
 
+        <div>
+            <label for="groups" class="block text-sm font-medium text-gray-700">Groups</label>
+            <div class="mt-1 relative rounded-md shadow-sm">
+              <input id="groups" name="groups" type="text" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="Description" value="{{form.description.initial}}">
+            </div>
+            {% if form.groups.errors %}<span class="text-sm font-medium text-red-600">{{ form.groups.errors.as_text }}</span>{% endif %}
+        </div>
+
         <div class="datepicker relative form-floating">
           <label for="date_joined" class="text-gray-700">Date joined</label>
             <input id="date_joined" name="date_joined" type="date"

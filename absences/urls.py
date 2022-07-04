@@ -9,6 +9,7 @@ urlpatterns = [
     path('absence/<str:pk>/resolve/', views.AbsenceResolveView.as_view(), name='absence_resolve'),
     path('absence/<str:pk>/edit/', views.AbsenceRequestEditView.as_view(), name='absence_edit'),
     path('absence/<str:pk>/', views.AbsenceView.as_view(), name='absence'),
+    path('approval_flow/<str:pk>/edit/', views.ApprovalFlowEditView.as_view(), name='approval_flow_edit'),
     path('calendar/<int:year>/<int:month>/', views.CalendarMonthlyView.as_view(), name='calendar_monthly'),
     path('calendar/<int:year>/', views.CalendarYearlyView.as_view(), name='calendar_yearly'),
     path('calendar/', views.CalendarYearlyView.as_view(), name='calendar'),

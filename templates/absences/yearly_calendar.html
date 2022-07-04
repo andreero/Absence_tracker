@@ -25,6 +25,13 @@
         {% if filter_description.errors %}<span class="text-sm font-medium text-red-600">{{ filter_description.errors.as_text }}</span>{% endif %}
     </div>
     <div>
+        <label for="filter_groups" class="block text-sm font-medium text-gray-700">Groups</label>
+        <div class="mt-1 relative rounded-md shadow-sm">
+          <input id="filter_groups" name="groups" type="text" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="Groups">
+        </div>
+        {% if filter_groups.errors %}<span class="text-sm font-medium text-red-600">{{ filter_groups.errors.as_text }}</span>{% endif %}
+    </div>
+    <div>
         <label for="country_code" class="block text-sm font-medium text-gray-700">Country</label>
         <div class="mt-1 relative rounded-md shadow-sm">
             {{ filter.form.country_code }}

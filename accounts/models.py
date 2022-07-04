@@ -7,11 +7,19 @@ from django_softdelete.models import SoftDeleteModel, SoftDeleteManager
 
 
 class Country(models.Model):
-    alpha_3 = models.TextField(db_column='CRY_COD', primary_key=True, max_length=3)
-    name = models.TextField(db_column='CRY_NAM', max_length='255')
+    alpha_3 = models.CharField(db_column='CRY_COD', primary_key=True, max_length=3)
+    name = models.CharField(db_column='CRY_NAM', max_length=255)
+    alpha_2 = models.CharField(db_column='CRY_2', max_length=2)
+    active_flag = models.BooleanField(db_column='ACT_FLG', default=True)
+    country_code = models.IntegerField(db_column='CRY_NUM_COD')
+    region = models.CharField(db_column='RGN_NAM', max_length=32)
+    subregion = models.CharField(db_column='SUB_RGN_NAM', max_length=255)
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        db_table = 'R_ORG_CRY'
 
 
 # Create your models here.
@@ -56,7 +64,8 @@ class User(SoftDeleteModel, AbstractBaseUser):
     username = models.EmailField(verbose_name='User email', max_length=255, primary_key=True, unique=True, db_column='USR_EML')
     user_id = models.UUIDField(default=uuid.uuid4, db_column='USR_COD')
     description = models.CharField(max_length=255, db_column='USR_NAM', blank=True)
-    country_code = models.ForeignKey(Country, db_column='CRY_COD', blank=True, null=True, on_delete=models.CASCADE)
+    groups = models.TextField(max_length=255, db_column='USR_GRP', blank=True, null=True)
+    country_code = models.ForeignKey(Country, db_column='CRY_COD', blank=True, null=True, on_delete=models.SET_NULL)
     date_joined = models.DateField(default=date.today, db_column='ENT_DAT')
     is_superuser = models.BooleanField(default=False, db_column='ADM_FLG')
     absence_limit = models.IntegerField(default=0, db_column='ABS_LMT')
@@ -72,7 +81,7 @@ class User(SoftDeleteModel, AbstractBaseUser):
 
     def get_absolute_url(self):
         return reverse(
-            'accounts:profile', kwargs={'username': self.username})
+            'accounts:profile', kwargs={'pk': self.username})
 
     def __str__(self):
         deleted = '<deleted> ' if self.is_deleted else ''

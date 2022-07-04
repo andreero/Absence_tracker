@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Absence, ApprovalFlow, AbsenceApprovalFlowStatus
+from .models import Absence, ApprovalFlow, AbsenceApprovalFlowStatus, AbsenceType
 
 
 class AbsenceAdmin(admin.ModelAdmin):
@@ -7,6 +7,10 @@ class AbsenceAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return self.model.global_objects
+
+
+class AbsenceTypeAdmin(admin.ModelAdmin):
+    model = AbsenceType
 
 
 class ApprovalFlowAdmin(admin.ModelAdmin):
@@ -25,5 +29,6 @@ class AbsenceApprovalFlowStatusAdmin(admin.ModelAdmin):
 
 # Register your models here.
 admin.site.register(Absence, AbsenceAdmin)
+admin.site.register(AbsenceType, AbsenceTypeAdmin)
 admin.site.register(ApprovalFlow, ApprovalFlowAdmin)
 admin.site.register(AbsenceApprovalFlowStatus, AbsenceApprovalFlowStatusAdmin)

@@ -11,7 +11,7 @@
       {% csrf_token %}
         <div class="flex items-center justify-center">
           <div class="datepicker relative form-floating mb-3 xl:w-96">
-              <label for="start_date" class="text-gray-700">Start date</label>
+              <label for="start_date" class="block text-sm font-medium text-gray-700">Start date</label>
             <input id="start_date" name="start_date" type="date"
               class="form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
               placeholder="Start date" />
@@ -21,12 +21,22 @@
 
         <div class="flex items-center justify-center">
           <div class="datepicker relative form-floating mb-3 xl:w-96">
-              <label for="end_date" class="text-gray-700">End date</label>
+              <label for="end_date" class="block text-sm font-medium text-gray-700">End date</label>
             <input id="end_date" name="end_date" type="date"
               class="form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
               placeholder="End date" />
             {% if form.end_date.errors %}<span class="text-sm font-medium text-red-600">{{ form.end_date.errors.as_text }}</span>{% endif %}
           </div>
+        </div>
+
+        <div>
+            <label for="absence_type" class="block text-sm font-medium text-gray-700">Absence type</label>
+            <select id="absence_type" name="absence_type" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full px-3 py-1.5 sm:text-sm border-gray-300 rounded-md">
+                {% for id, name in form.absence_type.field.choices %}
+                  <option value="{{id}}">{{name}}</option>
+                {% endfor %}
+            </select>
+            {% if form.absence_type.errors %}<span class="text-sm font-medium text-red-600">{{ form.absence_type.errors.as_text }}</span>{% endif %}
         </div>
 
         <div class="flex justify-center">

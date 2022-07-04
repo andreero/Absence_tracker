@@ -8,7 +8,15 @@ from django.db.models import Q
 
 # Create your models here.
 class AbsenceType(models.Model):
-    pass
+    absence_type = models.AutoField(db_column='ABS_TYP_COD', primary_key=True)
+    description = models.CharField(max_length=255, db_column='ABS_TYP_DSC')
+    user_selection_flag = models.BooleanField(default=True, db_column='USR_SLC_FLG')
+
+    def __str__(self):
+        return self.description
+
+    class Meta:
+        db_table = 'R_ABS_TYP'
 
 
 class ApprovalStatus(models.IntegerChoices):
@@ -29,6 +37,7 @@ class Absence(SoftDeleteModel, models.Model):
     absence_id = models.AutoField(db_column='ABS_BCK_COD', primary_key=True)
     start_date = models.DateField(db_column='ABS_STR_DAT')
     end_date = models.DateField(db_column='ABS_END_DAT')
+    absence_type = models.ForeignKey(AbsenceType, on_delete=models.CASCADE, db_column='ABS_TYP_COD')
     user_comment = models.TextField(db_column='ABS_USR_MSG', blank=True)
     approval_status_code = models.PositiveSmallIntegerField(
         choices=ApprovalStatus.choices, default=ApprovalStatus.NOT_APPROVED, db_column='APR_STS_COD')
@@ -61,6 +70,9 @@ class Absence(SoftDeleteModel, models.Model):
                 AbsenceApprovalFlowStatus.objects.create(
                     user=self.user, absence=self, approval_flow=flow,
                     approval_comment='', approval_status_code=ApprovalStatus.NOT_APPROVED)
+
+    class Meta:
+        db_table = 'D_ABS_CLD_STS'
 
 
 class ApprovalFlow(SoftDeleteModel, models.Model):

@@ -14,7 +14,7 @@ class UserCreationForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('username', 'description', 'country_code', 'is_superuser')
+        fields = ('username', 'description', 'groups', 'country_code', 'is_superuser')
 
     def clean_password2(self):
         # Check that the two password entries match
@@ -42,7 +42,7 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('username', 'password', 'description', 'country_code', 'is_superuser', 'is_deleted')
+        fields = ('username', 'password', 'description', 'groups', 'country_code', 'is_superuser', 'is_deleted')
 
 
 class UserAdmin(BaseUserAdmin):
@@ -57,7 +57,7 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ('is_superuser',)
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('description', 'country_code',)}),
+        ('Personal info', {'fields': ('description', 'groups', 'country_code',)}),
         ('Permissions', {'fields': ('is_superuser',)}),
         ('Status', {'fields': ('is_deleted',)}),
     )
@@ -66,7 +66,7 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'description', 'password1', 'password2'),
+            'fields': ('username', 'description', 'groups', 'password1', 'password2', 'is_superuser'),
         }),
     )
     search_fields = ('username',)

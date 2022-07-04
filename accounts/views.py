@@ -22,7 +22,7 @@ class SignUpView(UserPassesTestMixin, CreateView):
 
 class ProfileEditView(UserPassesTestMixin, UpdateView):
     model = get_user_model()
-    fields = ['username', 'user_id', 'description', 'country_code', 'date_joined', 'is_superuser']
+    fields = ['username', 'user_id', 'description', 'groups', 'country_code', 'date_joined', 'is_superuser']
     template_name = 'accounts/user_profile_edit_form.html'
 
     def test_func(self):

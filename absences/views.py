@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.views.generic import UpdateView, CreateView, DetailView, ListView
-from .models import Absence, ApprovalStatus, AbsenceApprovalFlowStatus
+from .models import Absence, ApprovalStatus, AbsenceApprovalFlowStatus, ApprovalFlow
 from django.db.models import Prefetch
 import datetime
 from django.db.models import Q
@@ -10,6 +10,8 @@ import calendar
 from collections import namedtuple
 from django.contrib.auth import get_user_model
 from .filters import CalendarFilter
+from django.contrib.auth.mixins import UserPassesTestMixin
+from .forms import ApprovalFlowFormset
 
 
 def get_month_names_and_lengths(year):
@@ -47,7 +49,7 @@ class IndexView(View):
 
 class AbsenceRequestView(LoginRequiredMixin, CreateView):
     model = Absence
-    fields = ['start_date', 'end_date', 'user_comment']
+    fields = ['start_date', 'end_date', 'absence_type', 'user_comment']
     template_name = 'absences/absence_request_form.html'
 
     def form_valid(self, form):
@@ -58,7 +60,7 @@ class AbsenceRequestView(LoginRequiredMixin, CreateView):
 
 class AbsenceRequestEditView(LoginRequiredMixin, UpdateView):
     model = Absence
-    fields = ['start_date', 'end_date', 'user_comment']
+    fields = ['start_date', 'end_date', 'absence_type', 'user_comment']
     template_name = 'absences/absence_edit_form.html'
 
 
@@ -112,6 +114,41 @@ class PendingAbsenceRequestsView(LoginRequiredMixin, ListView):
         pending_requests = self.get_queryset()
         context['pending_requests'] = pending_requests
         return context
+
+
+class ApprovalFlowEditView(UserPassesTestMixin, UpdateView):
+    model = get_user_model()
+    template_name = 'absences/approval_flow_edit_form.html'
+    fields = ['username', ]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.POST:
+            context['formset'] = ApprovalFlowFormset(self.request.POST, instance=self.object)
+        else:
+            context['formset'] = ApprovalFlowFormset(instance=self.object)
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        formset = context['formset']
+
+        if form.is_valid() and formset.is_valid():
+            for setform in formset:
+                if setform.cleaned_data and 'requester' not in setform.cleaned_data:
+                    setform.instance = self.object
+                    setform.cleaned_data['requester'] = self.object
+            formset.save()
+            form.save()
+        else:
+            return self.form_invalid(form)
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        return super().form_invalid(form)
+
+    def test_func(self):
+        return self.request.user.is_superuser
 
 
 class CalendarYearlyView(LoginRequiredMixin, ListView):

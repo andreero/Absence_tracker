@@ -16,11 +16,17 @@
           <dt class="text-sm font-medium text-gray-500">Date joined</dt>
           <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{profile.date_joined}}</dd>
         </div>
+        {% if user.is_superuser %}
         <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Groups</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{profile.groups}}</dd>
+        </div>
+        {% endif %}
+        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
           <dt class="text-sm font-medium text-gray-500">Country</dt>
           <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{profile.country_code}}</dd>
         </div>
-        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
           <dt class="text-sm font-medium text-gray-500">Is admin</dt>
           <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{profile.is_superuser}}</dd>
         </div>
@@ -38,6 +44,36 @@
   </div>
 </div>
 
+{% if user.is_superuser %}
+<div class="min-h-full flex items-center justify-center py-5 px-4">
+  <div class="max-w-mg space-y-4">
+    <div>
+      <h3 class="mt-6 text-center text-2xl font-bold text-gray-900">Absence approval flow for user:</h3>
+    </div>
+
+      <div class="max-w-xl bg-white shadow overflow-hidden sm:rounded-lg">
+      <dl>
+        {% for approval_flow in profile.requester_flows.all %}
+          <div class="bg-gray-50 px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Step {{approval_flow.approval_step}}</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              <span class="text-sm text-gray-500">Approval by </span>
+              <a href="{% url 'accounts:profile' pk=approval_flow.approver.username %}" class="whitespace-nowrap text-sm font-medium text-indigo-700 hover:text-indigo-900">
+              {{approval_flow.approver}}
+          </a></dd>
+          </div>
+        {% endfor %}
+      </dl>
+      <div class="mt-5 flex py-2 px-4">
+        <a href="{% url 'absences:approval_flow_edit' pk=profile.pk %}" type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+          Edit approval flow
+        </a>
+      </div>
+    </div>
+</div>
+</div>
+{% endif %}
+
 {% if user.is_superuser or user == profile %}
   <div class="min-h-full flex items-center justify-center py-5 px-4">
     <div class="max-w-mg space-y-4">
@@ -47,7 +83,7 @@
 
       {% for absence in profile.user_absences.all %}
         <div>
-            <a href="{{absence.get_absolute_url}}" class="inline-flex w-full items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <a href="{{absence.get_absolute_url}}" class="inline-flex w-full items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                 From {{absence.start_date}} to {{absence.end_date}}, status: {{absence.get_approval_status_code_display}}
             </a>
         </div>
