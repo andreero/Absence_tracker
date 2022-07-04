@@ -37,7 +37,8 @@ class Absence(SoftDeleteModel, models.Model):
     absence_id = models.AutoField(db_column='ABS_BCK_COD', primary_key=True)
     start_date = models.DateField(db_column='ABS_STR_DAT')
     end_date = models.DateField(db_column='ABS_END_DAT')
-    absence_type = models.ForeignKey(AbsenceType, on_delete=models.CASCADE, db_column='ABS_TYP_COD')
+    absence_type = models.ForeignKey(AbsenceType, on_delete=models.CASCADE, db_column='ABS_TYP_COD',
+                                     limit_choices_to={'user_selection_flag': True})
     user_comment = models.TextField(db_column='ABS_USR_MSG', blank=True)
     approval_status_code = models.PositiveSmallIntegerField(
         choices=ApprovalStatus.choices, default=ApprovalStatus.NOT_APPROVED, db_column='APR_STS_COD')
