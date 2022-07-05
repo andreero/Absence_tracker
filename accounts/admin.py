@@ -1,6 +1,5 @@
 from django import forms
 from django.contrib import admin
-from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.core.exceptions import ValidationError
@@ -56,8 +55,8 @@ class UserAdmin(BaseUserAdmin):
     list_display = ('username', 'description', 'is_superuser')
     list_filter = ('is_superuser',)
     fieldsets = (
-        (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('description', 'groups', 'country_code',)}),
+        (None, {'fields': ('username', 'password', 'user_id',)}),
+        ('Personal info', {'fields': ('description', 'groups', 'date_joined', 'country_code', 'absence_limit')}),
         ('Permissions', {'fields': ('is_superuser',)}),
         ('Status', {'fields': ('is_deleted',)}),
     )
@@ -66,7 +65,7 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'description', 'groups', 'password1', 'password2', 'is_superuser'),
+            'fields': ('username', 'password1', 'password2', 'user_id', 'description', 'groups', 'date_joined', 'country_code', 'absence_limit', 'is_superuser'),
         }),
     )
     search_fields = ('username',)

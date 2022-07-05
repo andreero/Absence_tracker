@@ -1,9 +1,10 @@
 from django.contrib.auth import get_user_model
-from .forms import SignUpForm, LoginForm, ProfileEditForm
-from django.views.generic import CreateView, DetailView, ListView, UpdateView
-from django.urls import reverse_lazy
-from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.views import LoginView
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DetailView, ListView, UpdateView
+
+from .forms import SignUpForm, LoginForm
 
 
 # Create your views here.
@@ -22,7 +23,7 @@ class SignUpView(UserPassesTestMixin, CreateView):
 
 class ProfileEditView(UserPassesTestMixin, UpdateView):
     model = get_user_model()
-    fields = ['username', 'user_id', 'description', 'groups', 'country_code', 'date_joined', 'is_superuser']
+    fields = ['username', 'user_id', 'description', 'groups', 'country_code', 'absence_limit', 'date_joined', 'is_superuser']
     template_name = 'accounts/user_profile_edit_form.html'
 
     def test_func(self):

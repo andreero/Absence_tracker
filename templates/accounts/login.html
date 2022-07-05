@@ -20,7 +20,7 @@
         </div>
       </div>
       {% if form.errors %}
-          <span class="block font-medium text-red-600">{{ form.non_field_errors.as_text }}</span>
+          <span class="block font-medium text-red-600">{{ form.errors.as_text }}</span>
       {% endif %}
 
       <div>

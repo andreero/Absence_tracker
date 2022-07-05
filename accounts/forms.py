@@ -1,11 +1,11 @@
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm
 from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm
 from django.forms import CharField
 
 
 class SignUpForm(UserCreationForm):
     class Meta:
-        fields = ('username', 'password1', 'password2', 'description', 'groups', 'country_code', 'is_superuser')
+        fields = ('username', 'user_id', 'password1', 'password2', 'description', 'groups', 'date_joined', 'absence_limit', 'country_code', 'is_superuser')
         model = get_user_model()
 
     def clean_username(self):
@@ -15,7 +15,7 @@ class SignUpForm(UserCreationForm):
 
 class ProfileEditForm(UserChangeForm):
     class Meta:
-        fields = ('description', 'groups', 'country_code', 'is_superuser')
+        fields = ('username', 'user_id', 'description', 'groups', 'date_joined', 'absence_limit', 'country_code', 'is_superuser')
         model = get_user_model()
 
     def clean_username(self):

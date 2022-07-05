@@ -1,8 +1,9 @@
-from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from django.shortcuts import reverse
-from datetime import date
 import uuid
+from datetime import date
+
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.db import models
+from django.shortcuts import reverse
 from django_softdelete.models import SoftDeleteModel, SoftDeleteManager
 
 

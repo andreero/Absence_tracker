@@ -20,6 +20,14 @@
         </div>
 
         <div>
+            <label for="user_id" class="block text-sm font-medium text-gray-700">User UUID</label>
+            <div class="mt-1 relative rounded-md shadow-sm">
+              <input id="user_id" name="user_id" type="text" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="UUID" value="{{form.user_id.initial}}">
+            </div>
+            {% if form.user_id.errors %}<span class="text-sm font-medium text-red-600">{{ form.user_id.errors.as_text }}</span>{% endif %}
+        </div>
+
+        <div>
             <label for="password1" class="block text-sm font-medium text-gray-700">Password</label>
             <div class="mt-1 relative rounded-md shadow-sm">
                 <input id="password1" name="password1" type="password" autocomplete="new-password" required class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="Password">
@@ -51,6 +59,22 @@
             {% if form.groups.errors %}<span class="text-sm font-medium text-red-600">{{ form.groups.errors.as_text }}</span>{% endif %}
         </div>
 
+        <div class="datepicker relative form-floating">
+          <label for="date_joined" class="text-gray-700">Date joined</label>
+            <input id="date_joined" name="date_joined" type="date"
+              class="form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+              placeholder="Date joined" value="{{ form.date_joined.initial|date:'Y-m-d'}}"/>
+            {% if form.date_joined.errors %}<span class="text-sm font-medium text-red-600">{{ form.date_joined.errors.as_text }}</span>{% endif %}
+        </div>
+
+        <div>
+            <label for="absence_limit" class="block text-sm font-medium text-gray-700">Absence limit</label>
+            <div class="mt-1 relative rounded-md shadow-sm">
+              <input id="absence_limit" name="absence_limit" type="number" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="Absence limit" value="{{form.absence_limit.initial}}">
+            </div>
+            {% if form.absence_limit.errors %}<span class="text-sm font-medium text-red-600">{{ form.absence_limit.errors.as_text }}</span>{% endif %}
+        </div>
+
         <div>
             <label for="country_code" class="block text-sm font-medium text-gray-700">Country</label>
             <select id="country_code" name="country_code" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md">
@@ -69,8 +93,8 @@
             {% if form.is_superuser.errors %}<span class="text-sm font-medium text-red-600">{{ form.is_superuser.errors.as_text }}</span>{% endif %}
         </div>
 
-        {% if form.non_field_errors %}
-          <span class="block text-sm font-medium text-red-600">{{ form.non_field_errors.as_text }}</span>
+        {% if form.errors %}
+          <span class="block text-sm font-medium text-red-600">{{ form.errors.as_text }}</span>
         {% endif %}
 
         <div>

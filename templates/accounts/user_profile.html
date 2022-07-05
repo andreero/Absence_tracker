@@ -16,20 +16,24 @@
           <dt class="text-sm font-medium text-gray-500">Date joined</dt>
           <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{profile.date_joined}}</dd>
         </div>
-        {% if user.is_superuser %}
         <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Groups</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{profile.groups}}</dd>
-        </div>
-        {% endif %}
-        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
           <dt class="text-sm font-medium text-gray-500">Country</dt>
           <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{profile.country_code}}</dd>
         </div>
+        {% if user.is_superuser %}
+        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Groups</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{profile.groups}}</dd>
+        </div>
         <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Absence limit</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{profile.absence_limit}}</dd>
+        </div>
+        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
           <dt class="text-sm font-medium text-gray-500">Is admin</dt>
           <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{profile.is_superuser}}</dd>
         </div>
+        {% endif %}
       </dl>
     </div>
 

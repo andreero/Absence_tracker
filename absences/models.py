@@ -1,14 +1,16 @@
-from django.db import models
-from django.conf import settings
-from django.shortcuts import reverse
+import datetime
 from datetime import timedelta
-from django_softdelete.models import SoftDeleteModel
+
+from django.conf import settings
+from django.db import models
 from django.db.models import Q
+from django.shortcuts import reverse
+from django_softdelete.models import SoftDeleteModel
 
 
 # Create your models here.
 class AbsenceType(models.Model):
-    absence_type = models.AutoField(db_column='ABS_TYP_COD', primary_key=True)
+    absence_type = models.IntegerField(db_column='ABS_TYP_COD', primary_key=True)
     description = models.CharField(max_length=255, db_column='ABS_TYP_DSC')
     user_selection_flag = models.BooleanField(default=True, db_column='USR_SLC_FLG')
 
@@ -60,8 +62,16 @@ class Absence(SoftDeleteModel, models.Model):
     def get_absolute_url(self):
         return reverse('absences:absence', kwargs={'pk': self.absence_id})
 
-    def get_duration(self):
+    @property
+    def duration(self):
         return (self.end_date - self.start_date + timedelta(days=1)).days
+
+    def get_duration_during_year(self, year):
+        if self.end_date.year < year or self.start_date.year > year:
+            return 0
+        else:
+            return (min(self.end_date, datetime.date(year, 12, 31)) - max(self.start_date, datetime.date(year, 1, 1))
+                    + timedelta(days=1)).days
 
     def save(self, *args, **kwargs):
         created = not self.pk  # Status objects are created only on the initial save

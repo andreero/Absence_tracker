@@ -1,7 +1,7 @@
-from django.contrib.auth import get_user_model
 import django_filters
-from django.forms import TextInput, SelectMultiple
 from accounts.models import Country
+from django.contrib.auth import get_user_model
+from django.forms import TextInput, SelectMultiple
 
 
 class CalendarFilter(django_filters.FilterSet):

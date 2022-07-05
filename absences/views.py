@@ -1,17 +1,20 @@
-from django.shortcuts import render, redirect
+import calendar
+import datetime
+import math
+from collections import namedtuple
+
+from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.db.models import Prefetch
+from django.db.models import Q
+from django.shortcuts import render, redirect
 from django.views import View
 from django.views.generic import UpdateView, CreateView, DetailView, ListView
-from .models import Absence, ApprovalStatus, AbsenceApprovalFlowStatus, ApprovalFlow
-from django.db.models import Prefetch
-import datetime
-from django.db.models import Q
-import calendar
-from collections import namedtuple
-from django.contrib.auth import get_user_model
+
 from .filters import CalendarFilter
-from django.contrib.auth.mixins import UserPassesTestMixin
 from .forms import ApprovalFlowFormset
+from .models import Absence, ApprovalStatus, AbsenceApprovalFlowStatus
 
 
 def get_month_names_and_lengths(year):
@@ -39,6 +42,56 @@ def next_month(year, month):
         return year+1, 1
     else:
         return year, month+1
+
+
+def get_all_user_absences_and_other_users_absences(user, period_start, period_end, show_unapproved_for_others=False):
+    model = get_user_model()
+
+    all_yearly_absences_queryset = Absence.objects.filter(
+        start_date__lte=period_end,
+        end_date__gte=period_start,
+    )
+
+    approved_yearly_absences_queryset = Absence.objects.filter(
+        start_date__lte=period_end,
+        end_date__gte=period_start,
+        approval_status_code=ApprovalStatus.APPROVED
+    )
+
+    if show_unapproved_for_others:
+        # Select all absences that happen to fall on that time period
+        other_users_absences_queryset = all_yearly_absences_queryset
+    else:
+        # Select absences that happen to fall on that time period, but only approved absences are shown for other users
+        other_users_absences_queryset = approved_yearly_absences_queryset
+
+    current_user_absences = model.objects.filter(
+        username=user.username
+    ).prefetch_related(
+        Prefetch('user_absences', queryset=all_yearly_absences_queryset))
+
+    other_users_absences = model.objects.filter(
+        ~Q(username=user.username)
+    ).prefetch_related(
+        Prefetch('user_absences', queryset=other_users_absences_queryset))
+
+    all_user_absences_queryset = current_user_absences | other_users_absences
+    return all_user_absences_queryset
+
+
+def total_absence_allowed(user, year):
+    if year > user.date_joined.year:
+        return user.absence_limit
+    elif year < user.date_joined.year:
+        return 0
+    else:
+        year_length = 366 if calendar.isleap(year) else 365
+        user_absence_allowed = user.absence_limit * (year_length - user.date_joined.timetuple().tm_yday) / 365
+        return math.ceil(user_absence_allowed)
+
+
+def remaining_vacation_including_leave_on_demand(user, year, total_absence_allowed):
+    return total_absence_allowed - sum((absence.get_duration_during_year(year) for absence in user.user_absences.all()))
 
 
 # Create your views here.
@@ -159,43 +212,24 @@ class CalendarYearlyView(LoginRequiredMixin, ListView):
         year = self.kwargs.get('year', datetime.datetime.today().year)
         year_start = datetime.date(year, 1, 1)
         year_end = datetime.date(year, 12, 31)
+        show_unapproved_for_others = self.request.user.is_superuser
 
-        all_yearly_absences_queryset = Absence.objects.filter(
-                start_date__lte=year_end,
-                end_date__gte=year_start,
-            )
-
-        approved_yearly_absences_queryset = Absence.objects.filter(
-                start_date__lte=year_end,
-                end_date__gte=year_start,
-                approval_status_code=ApprovalStatus.APPROVED
-            )
-
-        if self.request.user.is_superuser:
-            # Select all absences that happen to fall on that year
-            other_users_absences_queryset = all_yearly_absences_queryset
-        else:
-            # Select absences that happen to fall on that year, but only approved absences are selected for other users
-            other_users_absences_queryset = approved_yearly_absences_queryset
-
-        current_user_absences = self.model.objects.filter(
-            username=self.request.user.username
-        ).prefetch_related(
-            Prefetch('user_absences', queryset=all_yearly_absences_queryset))
-
-        other_users_absences = self.model.objects.filter(
-            ~Q(username=self.request.user.username)
-        ).prefetch_related(
-            Prefetch('user_absences', queryset=other_users_absences_queryset))
-
-        all_user_absences_queryset = current_user_absences | other_users_absences
+        all_user_absences_queryset = get_all_user_absences_and_other_users_absences(
+            user=self.request.user, period_start=year_start, period_end=year_end,
+            show_unapproved_for_others=show_unapproved_for_others
+        )
         filtered_queryset = CalendarFilter(self.request.GET, queryset=all_user_absences_queryset).qs
         return filtered_queryset
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['users'] = self.object_list
         year = self.kwargs.get('year', datetime.datetime.today().year)
+        for user in self.object_list:
+            if self.request.user.is_superuser or user == self.request.user:
+                user.total_absence_allowed = total_absence_allowed(user=user, year=year)
+                user.remaining_vacation_including_leave_on_demand = remaining_vacation_including_leave_on_demand(
+                    user=user, year=year, total_absence_allowed=user.total_absence_allowed)
+        context['users'] = self.object_list
         context['year'] = year
         context['months'] = get_month_names_and_lengths(year=year)
         context['filter'] = CalendarFilter(self.request.GET, queryset=self.model.objects.all())
@@ -211,36 +245,12 @@ class CalendarMonthlyView(LoginRequiredMixin, ListView):
         month = self.kwargs.get('month', datetime.datetime.today().month)
         month_start = datetime.date(year, month, 1)
         month_end = datetime.date(year, month, get_last_day_of_month(year=year, month=month))
+        show_unapproved_for_others = self.request.user.is_superuser
 
-        all_yearly_absences_queryset = Absence.objects.filter(
-            start_date__lte=month_end,
-            end_date__gte=month_start,
+        all_user_absences_queryset = get_all_user_absences_and_other_users_absences(
+            user=self.request.user, period_start=month_start, period_end=month_end,
+            show_unapproved_for_others=show_unapproved_for_others
         )
-
-        approved_yearly_absences_queryset = Absence.objects.filter(
-            start_date__lte=month_end,
-            end_date__gte=month_start,
-            approval_status_code=ApprovalStatus.APPROVED
-        )
-
-        if self.request.user.is_superuser:
-            # Select all absences that happen to fall on that year
-            other_users_absences_queryset = all_yearly_absences_queryset
-        else:
-            # Select absences that happen to fall on that year, but only approved absences are selected for other users
-            other_users_absences_queryset = approved_yearly_absences_queryset
-
-        current_user_absences = self.model.objects.filter(
-            username=self.request.user.username
-        ).prefetch_related(
-            Prefetch('user_absences', queryset=all_yearly_absences_queryset))
-
-        other_users_absences = self.model.objects.filter(
-            ~Q(username=self.request.user.username)
-        ).prefetch_related(
-            Prefetch('user_absences', queryset=other_users_absences_queryset))
-
-        all_user_absences_queryset = current_user_absences | other_users_absences
         filtered_queryset = CalendarFilter(self.request.GET, queryset=all_user_absences_queryset).qs
         return filtered_queryset
 

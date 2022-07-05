@@ -12,6 +12,14 @@
       {% csrf_token %}
 
         <div>
+            <label for="username" class="block text-sm font-medium text-gray-700">Email address</label>
+            <div class="mt-1 relative rounded-md shadow-sm">
+              <input id="username" name="username" type="email" autocomplete="email" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="Email address" value="{{form.username.initial}}">
+            </div>
+            {% if form.username.errors %}<span class="text-sm font-medium text-red-600">{{ form.username.errors.as_text }}</span>{% endif %}
+        </div>
+
+        <div>
             <label for="user_id" class="block text-sm font-medium text-gray-700">User UUID</label>
             <div class="mt-1 relative rounded-md shadow-sm">
               <input id="user_id" name="user_id" type="text" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="UUID" value="{{form.user_id.initial}}">
@@ -30,7 +38,7 @@
         <div>
             <label for="groups" class="block text-sm font-medium text-gray-700">Groups</label>
             <div class="mt-1 relative rounded-md shadow-sm">
-              <input id="groups" name="groups" type="text" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="Description" value="{{form.description.initial}}">
+              <input id="groups" name="groups" type="text" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="Groups" value="{{form.groups.initial}}">
             </div>
             {% if form.groups.errors %}<span class="text-sm font-medium text-red-600">{{ form.groups.errors.as_text }}</span>{% endif %}
         </div>
@@ -41,6 +49,14 @@
               class="form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
               placeholder="Date joined" value="{{ form.date_joined.initial|date:'Y-m-d'}}"/>
             {% if form.date_joined.errors %}<span class="text-sm font-medium text-red-600">{{ form.date_joined.errors.as_text }}</span>{% endif %}
+        </div>
+
+        <div>
+            <label for="absence_limit" class="block text-sm font-medium text-gray-700">Absence limit</label>
+            <div class="mt-1 relative rounded-md shadow-sm">
+              <input id="absence_limit" name="absence_limit" type="number" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" placeholder="Absence limit (days)" value="{{form.absence_limit.initial}}">
+            </div>
+            {% if form.absence_limit.errors %}<span class="text-sm font-medium text-red-600">{{ form.absence_limit.errors.as_text }}</span>{% endif %}
         </div>
 
         <div>
@@ -61,8 +77,8 @@
             {% if form.is_superuser.errors %}<span class="text-sm font-medium text-red-600">{{ form.is_superuser.errors.as_text }}</span>{% endif %}
         </div>
 
-        {% if form.non_field_errors %}
-          <span class="block text-sm font-medium text-red-600">{{ form.non_field_errors.as_text }}</span>
+        {% if form.errors %}
+          <span class="block text-sm font-medium text-red-600">{{ form.errors.as_text }}</span>
         {% endif %}
 
         <div>
