@@ -90,9 +90,19 @@ def total_absence_allowed(user, year):
         return math.ceil(user_absence_allowed)
 
 
-def remaining_vacation_including_leave_on_demand(user, year, total_absence_allowed):
-    return total_absence_allowed - sum((absence.get_duration_during_year(year) for absence in user.user_absences.all()
-                                        if absence.approval_status_code != ApprovalStatus.REJECTED))
+def remaining_vacation_including_leave_on_demand(user, year, absence_allowed):
+    valid_absence_type_codes = [100, 101, 102, 103]
+    total_absences = sum((absence.get_duration_during_year(year) for absence in user.user_absences.all()
+                                  if absence.approval_status_code != ApprovalStatus.REJECTED and absence.absence_type.pk in valid_absence_type_codes))
+    for absence in user.user_absences.all():
+        print(absence.absence_type, type(absence.absence_type))
+    return absence_allowed - total_absences
+
+
+def remaining_vacation(user, year, absence_allowed):
+    valid_absence_type_codes = [100]
+    return absence_allowed - sum((absence.get_duration_during_year(year) for absence in user.user_absences.all()
+                                  if absence.approval_status_code != ApprovalStatus.REJECTED and absence.absence_type in valid_absence_type_codes))
 
 
 # Create your views here.
@@ -240,8 +250,11 @@ class CalendarYearlyView(LoginRequiredMixin, ListView):
         for user in self.object_list:
             if self.request.user.is_superuser or user == self.request.user:
                 user.total_absence_allowed = total_absence_allowed(user=user, year=year)
+                user.remaining_vacation = remaining_vacation(
+                    user=user, year=year, absence_allowed=user.total_absence_allowed)
                 user.remaining_vacation_including_leave_on_demand = remaining_vacation_including_leave_on_demand(
-                    user=user, year=year, total_absence_allowed=user.total_absence_allowed)
+                    user=user, year=year, absence_allowed=user.total_absence_allowed)
+
         context['users'] = self.object_list
         context['year'] = year
         context['months'] = get_month_names_and_lengths(year=year)

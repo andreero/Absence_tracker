@@ -61,7 +61,19 @@
 
 <div class="mt-8 chart-wrapper px-4">
     <div class="flex chart-header w-full">
-        <div style="flex:2" class="flex justify-end h-8">
+        <div style="flex:3" class="flex justify-end">
+              <div style="flex:3" class="flex items-center justify-end">
+                  <span class="text-sm text-gray-900 px-4">User</span>
+              </div>
+                <div style="flex:1" class="flex items-center">
+                    <span class="text-sm text-gray-500 px-2">Total absence allowed</span>
+                </div>
+                <div style="flex:1" class="flex items-center">
+                    <span class="text-sm text-gray-500 px-2">Remaining vacation</span>
+                </div>
+                <div style="flex:1" class="flex items-center">
+                    <span class="text-sm text-gray-500 px-2">Remaining vacation (incl. leave on demand)</span>
+                </div>
         </div>
         <div style="flex:8" class="flex h-8">
               <ul class="chart-columns w-full">
@@ -77,12 +89,19 @@
       {% for absence_user in users %}
       <li data-user-name="{{absence_user.description}}" data-user-email="{{absence_user.username}}">
           <div class="h-8 w-full flex" >
-              <div style="flex:1" class="flex items-center justify-end">
+              <div style="flex:3" class="flex">
+              <div style="flex:3" class="flex items-center justify-end">
                   <a href="{% url 'accounts:profile' pk=absence_user.username %}" class="whitespace-nowrap text-base font-medium text-indigo-700 hover:text-indigo-900 px-4">{{absence_user.description}}</a>
               </div>
-                <div style="flex:1" class="flex items-center justify-end">
-                    <span class="px-4">{{absence_user.total_absence_allowed}}</span>
-                    <span class="px-4">{{absence_user.remaining_vacation_including_leave_on_demand}}</span>
+                <div style="flex:1" class="flex items-center">
+                    <span class="text-sm px-2">{{absence_user.total_absence_allowed}}</span>
+                </div>
+                <div style="flex:1" class="flex items-center">
+                    <span class="text-sm px-2">{{absence_user.remaining_vacation}}</span>
+                </div>
+                <div style="flex:1" class="flex items-center">
+                    <span class="text-sm px-2">{{absence_user.remaining_vacation_including_leave_on_demand}}</span>
+                </div>
               </div>
               <div style="flex:8" class="flex">
                   {% for absence in absence_user.user_absences.all %}
