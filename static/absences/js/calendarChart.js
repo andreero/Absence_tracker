@@ -82,15 +82,25 @@ function createChart(e) {
 
             switch (el.dataset.approvalStatusCode) {
                 case '0':
-                    el.style.backgroundColor = "#d1d5db"; break; //grey
+                    el.style.backgroundColor = "#d1d5db";  //grey
+                    el.style.zIndex = 100;
+                    break;
                 case '1':
-                    el.style.backgroundColor = "#ea580c"; break; //orange
+                    el.style.backgroundColor = "#ea580c";  //orange
+                    el.style.zIndex = 100;
+                    break;
                 case '2':
-                    el.style.backgroundColor = "#15803d"; break;  //green
+                    el.style.backgroundColor = "#15803d";  //green
+                    el.style.zIndex = 200;
+                    break;
                 case '3':
-                    el.style.backgroundColor = "#b91c1c"; break;  //red
+                    el.style.backgroundColor = "#b91c1c";  //red
+                    el.style.zIndex = 50;
+                    break;
                 default:
-                    el.style.backgroundColor = "#1d4ed8"; break;  //blue
+                    el.style.backgroundColor = "#1d4ed8";  //blue
+                    el.style.zIndex = 100;
+                    break;
             }
         }
   });

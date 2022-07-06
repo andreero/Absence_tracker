@@ -709,6 +709,10 @@ select {
   margin-top: 1rem;
 }
 
+.mr-2 {
+  margin-right: 0.5rem;
+}
+
 .ml-8 {
   margin-left: 2rem;
 }
@@ -745,6 +749,10 @@ select {
   height: 2.5rem;
 }
 
+.h-2 {
+  height: 0.5rem;
+}
+
 .h-4 {
   height: 1rem;
 }
@@ -759,6 +767,10 @@ select {
 
 .w-auto {
   width: auto;
+}
+
+.w-2 {
+  width: 0.5rem;
 }
 
 .w-4 {
@@ -865,6 +877,10 @@ select {
 
 .rounded {
   border-radius: 0.25rem;
+}
+
+.rounded-full {
+  border-radius: 9999px;
 }
 
 .rounded-none {

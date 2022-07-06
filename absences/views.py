@@ -13,7 +13,7 @@ from django.views import View
 from django.views.generic import UpdateView, CreateView, DetailView, ListView
 
 from .filters import CalendarFilter
-from .forms import ApprovalFlowFormset
+from .forms import ApprovalFlowFormset, AbsenceRequestForm
 from .models import Absence, ApprovalStatus, AbsenceApprovalFlowStatus
 
 
@@ -91,7 +91,8 @@ def total_absence_allowed(user, year):
 
 
 def remaining_vacation_including_leave_on_demand(user, year, total_absence_allowed):
-    return total_absence_allowed - sum((absence.get_duration_during_year(year) for absence in user.user_absences.all()))
+    return total_absence_allowed - sum((absence.get_duration_during_year(year) for absence in user.user_absences.all()
+                                        if absence.approval_status_code != ApprovalStatus.REJECTED))
 
 
 # Create your views here.
@@ -102,8 +103,14 @@ class IndexView(View):
 
 class AbsenceRequestView(LoginRequiredMixin, CreateView):
     model = Absence
-    fields = ['start_date', 'end_date', 'absence_type', 'user_comment']
+    form_class = AbsenceRequestForm
     template_name = 'absences/absence_request_form.html'
+
+    def get_form_kwargs(self):
+        """ Passes the request object to the form class."""
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
 
     def form_valid(self, form):
         if not self.request.user.is_anonymous:
@@ -113,8 +120,14 @@ class AbsenceRequestView(LoginRequiredMixin, CreateView):
 
 class AbsenceRequestEditView(LoginRequiredMixin, UpdateView):
     model = Absence
-    fields = ['start_date', 'end_date', 'absence_type', 'user_comment']
+    form_class = AbsenceRequestForm
     template_name = 'absences/absence_edit_form.html'
+
+    def get_form_kwargs(self):
+        """ Passes the request object to the form class."""
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
 
 
 class AbsenceView(LoginRequiredMixin, DetailView):

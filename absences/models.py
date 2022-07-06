@@ -114,7 +114,8 @@ class AbsenceApprovalFlowStatus(SoftDeleteModel, models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_column='USR_EML')
     absence = models.ForeignKey(
         Absence, on_delete=models.CASCADE, db_column='ABS_BCK_COD', related_name='approval_flow_statuses')
-    approval_flow = models.ForeignKey(ApprovalFlow, on_delete=models.CASCADE, db_column='APR_FLW')
+    approval_flow = models.ForeignKey(ApprovalFlow, on_delete=models.CASCADE, db_column='APR_FLW',
+                                      related_name='approval_flow_statuses')
     approval_status_code = models.PositiveSmallIntegerField(
         choices=ApprovalStatus.choices, default=ApprovalStatus.NOT_APPROVED, db_column='APR_STS_COD')
     approval_comment = models.TextField(db_column='APR_CMT', blank=True)

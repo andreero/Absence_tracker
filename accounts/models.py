@@ -110,5 +110,12 @@ class User(SoftDeleteModel, AbstractBaseUser):
         # Simplest possible answer: Yes, always
         return True
 
+    def has_unresolved_absence_requests(self):
+        if not self.is_staff:
+            return False
+        if self.approver_flows.filter(approval_flow_statuses__approval_status_code=0).exists():
+            return True
+        return False
+
     class Meta:
         db_table = 'R_USR'
