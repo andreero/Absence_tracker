@@ -10,8 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+import environ
+import django_heroku
 import os
 from pathlib import Path
+
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -87,11 +92,11 @@ WSGI_APPLICATION = 'absence_app.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'absence',
-        'USER': 'absence_admin',
-        'PASSWORD': 'absence_password',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'NAME': env('DB_NAME'),
+        'USER':  env('DB_USER'),
+        'PASSWORD':  env('DB_PASSWORD'),
+        'HOST':  env('DB_HOST'),
+        'PORT':  env('DB_PORT'),
     }
 }
 
@@ -124,8 +129,8 @@ MICROSOFT_AUTH_CLIENT_SECRET = 'NA18Q~gfbkn_0pJB3hqi6Z~Y1OUrLrd3vSFLDaEs'
 # MICROSOFT_AUTH_TENANT_ID = 'your-tenant-id-from-apps.dev.microsoft.com'
 
 MICROSOFT = {
-    "app_id": "5f9f7319-dd98-45cc-bd18-008ff63da43c",
-    "app_secret": "NA18Q~gfbkn_0pJB3hqi6Z~Y1OUrLrd3vSFLDaEs",
+    "app_id": env('MICROSOFT_AUTH_CLIENT_ID'),
+    "app_secret": env('MICROSOFT_AUTH_CLIENT_SECRET'),
     "redirect": "http://localhost:8000/microsoft_authentication/callback",
     "scopes": ["user.read"],
     "authority": "https://login.microsoftonline.com/common",  # or using tenant "https://login.microsoftonline.com/{tenant}",
@@ -163,5 +168,4 @@ LOGOUT_REDIRECT_URL = '/'
 LOGIN_URL = '/accounts/login/'
 
 # Configure Django App for Heroku.
-import django_heroku
 django_heroku.settings(locals())
