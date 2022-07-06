@@ -94,8 +94,6 @@ def remaining_vacation_including_leave_on_demand(user, year, absence_allowed):
     valid_absence_type_codes = [100, 101, 102, 103]
     total_absences = sum((absence.get_duration_during_year(year) for absence in user.user_absences.all()
                                   if absence.approval_status_code != ApprovalStatus.REJECTED and absence.absence_type.pk in valid_absence_type_codes))
-    for absence in user.user_absences.all():
-        print(absence.absence_type, type(absence.absence_type))
     return absence_allowed - total_absences
 
 
