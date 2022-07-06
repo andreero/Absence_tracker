@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-72^e_x+eo29iu+qi#r!z)smn99rly42*dtw0o-k4mt_e^m4ycw'
+SECRET_KEY = env('ABSENCE_DJANGO_SECRET_KEY'),
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -92,11 +92,11 @@ WSGI_APPLICATION = 'absence_app.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': env('DB_NAME'),
-        'USER':  env('DB_USER'),
-        'PASSWORD':  env('DB_PASSWORD'),
-        'HOST':  env('DB_HOST'),
-        'PORT':  env('DB_PORT'),
+        'NAME': env('ABSENCE_DB_NAME'),
+        'USER':  env('ABSENCE_DB_USER'),
+        'PASSWORD':  env('ABSENCE_DB_PASSWORD'),
+        'HOST':  env('ABSENCE_DB_HOST'),
+        'PORT':  env('ABSENCE_DB_PORT'),
     }
 }
 
@@ -123,14 +123,9 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-MICROSOFT_AUTH_CLIENT_ID = '5f9f7319-dd98-45cc-bd18-008ff63da43c'
-MICROSOFT_AUTH_CLIENT_SECRET = 'NA18Q~gfbkn_0pJB3hqi6Z~Y1OUrLrd3vSFLDaEs'
-# Tenant ID is also needed for single tenant applications
-# MICROSOFT_AUTH_TENANT_ID = 'your-tenant-id-from-apps.dev.microsoft.com'
-
 MICROSOFT = {
-    "app_id": env('MICROSOFT_AUTH_CLIENT_ID'),
-    "app_secret": env('MICROSOFT_AUTH_CLIENT_SECRET'),
+    "app_id": env('ABSENCE_MICROSOFT_AUTH_CLIENT_ID'),
+    "app_secret": env('ABSENCE_MICROSOFT_AUTH_CLIENT_SECRET'),
     "redirect": "http://localhost:8000/microsoft_authentication/callback",
     "scopes": ["user.read"],
     "authority": "https://login.microsoftonline.com/common",  # or using tenant "https://login.microsoftonline.com/{tenant}",
