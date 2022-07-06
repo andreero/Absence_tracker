@@ -131,7 +131,7 @@ MICROSOFT = {
     "redirect": "http://localhost:8000/microsoft_authentication/callback",
     "scopes": ["user.read"],
     "authority": "https://login.microsoftonline.com/common",  # or using tenant "https://login.microsoftonline.com/{tenant}",
-    "valid_email_domains": ["yandex.ru"],
+    "valid_email_domains": [],
     "logout_uri": "http://localhost:8000/admin/logout"
 }
 
