@@ -168,9 +168,9 @@ class AbsenceResolveView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         approval_flow_status = self.model.objects.get(pk=self.kwargs.get('pk'))
         if request.method == 'POST' and 'approve' in request.POST:
-            approval_flow_status.approve()
+            approval_flow_status.approve(approval_comment=request.POST.get('approval_comment'))
         if request.method == 'POST' and 'reject' in request.POST:
-            approval_flow_status.reject()
+            approval_flow_status.reject(approval_comment=request.POST.get('approval_comment'))
         return redirect(approval_flow_status.absence)
 
 

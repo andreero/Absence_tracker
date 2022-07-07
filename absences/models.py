@@ -73,8 +73,25 @@ class Absence(SoftDeleteModel, models.Model):
             return (min(self.end_date, datetime.date(year, 12, 31)) - max(self.start_date, datetime.date(year, 1, 1))
                     + timedelta(days=1)).days
 
+    def update_approval_message_and_comment(self):
+        """ Combine statuses and comments from individual approval steps into a single message and comment"""
+        approval_message = list()
+        approval_comment = list()
+        for flow in self.approval_flow_statuses.all():
+            if self.approval_status_code == ApprovalStatus.NOT_APPROVED:
+                msg = f'Not yet approved by {flow.approval_flow.approver}'
+            else:
+                msg = f'{flow.get_approval_status_code_display()} by {flow.approval_flow.approver} on {flow.updated_at.date()}'
+            approval_message.append(msg)
+            print(flow, msg)
+            if flow.approval_comment:
+                approval_comment.append(f'{flow.approval_flow.approver}: {flow.approval_comment}')
+        self.approval_message = '; '.join(approval_message)
+        self.approval_comment = '; '.join(approval_comment)
+
     def save(self, *args, **kwargs):
         created = not self.pk  # Status objects are created only on the initial save
+        self.update_approval_message_and_comment()
         super().save(*args, **kwargs)
         if created:
             for flow in self.user.requester_flows.all():
@@ -130,8 +147,9 @@ class AbsenceApprovalFlowStatus(SoftDeleteModel, models.Model):
         return f'{deleted}approval flow status [{self.approval_flow}] for absence [{self.absence}], ' \
                f'status {self.approval_status_code}'
 
-    def reject(self):
+    def reject(self, approval_comment):
         self.approval_status_code = ApprovalStatus.REJECTED
+        self.approval_comment = approval_comment
         self.save()
 
         self.absence.approval_status_code = ApprovalStatus.REJECTED
@@ -144,8 +162,9 @@ class AbsenceApprovalFlowStatus(SoftDeleteModel, models.Model):
             following_flow_step.approval_status_code = ApprovalStatus.REJECTED
             following_flow_step.save()
 
-    def approve(self):
+    def approve(self, approval_comment):
         self.approval_status_code = ApprovalStatus.APPROVED
+        self.approval_comment = approval_comment
         self.save()
 
         current_step_number = self.approval_flow.approval_step
