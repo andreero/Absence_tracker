@@ -177,8 +177,14 @@ class AbsenceApprovalFlowStatus(SoftDeleteModel, models.Model):
 
         following_approval_flow_steps = self.absence.approval_flow_statuses\
             .filter(approval_flow__approval_step__gt=current_step_number)
+        
         if following_approval_flow_steps.exists():
-            self.absence.approval_status_code = ApprovalStatus.IN_PROGRESS
+            has_rejected_following_steps = following_approval_flow_steps.filter(
+                approval_status_code=ApprovalStatus.REJECTED).exists()
+            if has_rejected_following_steps:
+                self.absence.approval_status_code = ApprovalStatus.REJECTED
+            else:
+                self.absence.approval_status_code = ApprovalStatus.IN_PROGRESS
         else:
             self.absence.approval_status_code = ApprovalStatus.APPROVED
         self.absence.save()
