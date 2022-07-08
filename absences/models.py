@@ -6,6 +6,7 @@ from django.db import models
 from django.db.models import Q
 from django.shortcuts import reverse
 from django_softdelete.models import SoftDeleteModel
+from accounts.models import Country
 
 
 # Create your models here.
@@ -126,6 +127,9 @@ class ApprovalFlow(SoftDeleteModel, models.Model):
         deleted = '<deleted> ' if self.is_deleted else ''
         return f'{deleted}approval step #{self.approval_step} for {self.requester} by approver {self.approver}'
 
+    class Meta:
+        db_table = 'R_APR_FLW'
+
 
 class AbsenceApprovalFlowStatus(SoftDeleteModel, models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_column='USR_EML')
@@ -177,7 +181,7 @@ class AbsenceApprovalFlowStatus(SoftDeleteModel, models.Model):
 
         following_approval_flow_steps = self.absence.approval_flow_statuses\
             .filter(approval_flow__approval_step__gt=current_step_number)
-        
+
         if following_approval_flow_steps.exists():
             has_rejected_following_steps = following_approval_flow_steps.filter(
                 approval_status_code=ApprovalStatus.REJECTED).exists()
@@ -188,3 +192,19 @@ class AbsenceApprovalFlowStatus(SoftDeleteModel, models.Model):
         else:
             self.absence.approval_status_code = ApprovalStatus.APPROVED
         self.absence.save()
+
+    class Meta:
+        db_table = 'D_ABS_APR_FLW'
+
+
+class PublicHoliday(models.Model):
+    country = models.ForeignKey(Country, on_delete=models.CASCADE, db_column='CRY_COD', related_name='holidays')
+    date = models.DateField(db_column='CLD_DAT')
+    description = models.CharField(max_length=255, db_column='HLD_DSC')
+
+    def __str__(self):
+        return self.description
+
+    class Meta:
+        db_table = 'R_PBL_HLD'
+

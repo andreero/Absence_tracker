@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Absence, ApprovalFlow, AbsenceApprovalFlowStatus, AbsenceType
+from .models import Absence, ApprovalFlow, AbsenceApprovalFlowStatus, AbsenceType, PublicHoliday
 
 
 class AbsenceAdmin(admin.ModelAdmin):
@@ -33,3 +33,4 @@ admin.site.register(Absence, AbsenceAdmin)
 admin.site.register(AbsenceType, AbsenceTypeAdmin)
 admin.site.register(ApprovalFlow, ApprovalFlowAdmin)
 admin.site.register(AbsenceApprovalFlowStatus, AbsenceApprovalFlowStatusAdmin)
+admin.site.register(PublicHoliday)

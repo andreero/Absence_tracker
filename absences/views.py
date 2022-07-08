@@ -68,12 +68,14 @@ def get_all_user_absences_and_other_users_absences(user, period_start, period_en
     current_user_absences = model.objects.filter(
         username=user.username
     ).prefetch_related(
-        Prefetch('user_absences', queryset=all_yearly_absences_queryset))
+        Prefetch('user_absences', queryset=all_yearly_absences_queryset)
+    ).prefetch_related('user_absences__absence_type')
 
     other_users_absences = model.objects.filter(
         ~Q(username=user.username)
     ).prefetch_related(
-        Prefetch('user_absences', queryset=other_users_absences_queryset))
+        Prefetch('user_absences', queryset=other_users_absences_queryset)
+    ).prefetch_related('user_absences__absence_type')
 
     all_user_absences_queryset = current_user_absences | other_users_absences
     return all_user_absences_queryset
