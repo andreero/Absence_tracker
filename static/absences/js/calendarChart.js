@@ -29,7 +29,7 @@ function getDaysInMonth(year, month) {
 function createChart(e) {
     const chartWidth = document.querySelector('.chart-columns').offsetWidth;
     const chartLeft = document.querySelector('.chart-columns').offsetLeft;
-    const tasks = document.querySelectorAll('a.chart-bar');
+    const tasks = document.querySelectorAll('.chart-bar');
 
     const [urlYear, urlMonth] = getURLYearMonth();
     const monthlyView = (urlMonth != null);

@@ -69,13 +69,13 @@ def get_all_user_absences_and_other_users_absences(user, period_start, period_en
         username=user.username
     ).prefetch_related(
         Prefetch('user_absences', queryset=all_yearly_absences_queryset)
-    ).prefetch_related('user_absences__absence_type')
+    ).prefetch_related('user_absences__absence_type').prefetch_related('country_code__holidays')
 
     other_users_absences = model.objects.filter(
         ~Q(username=user.username)
     ).prefetch_related(
         Prefetch('user_absences', queryset=other_users_absences_queryset)
-    ).prefetch_related('user_absences__absence_type')
+    ).prefetch_related('user_absences__absence_type').prefetch_related('country_code__holidays')
 
     all_user_absences_queryset = current_user_absences | other_users_absences
     return all_user_absences_queryset
@@ -254,6 +254,7 @@ class CalendarYearlyView(LoginRequiredMixin, ListView):
                     user=user, year=year, absence_allowed=user.total_absence_allowed)
                 user.remaining_vacation_including_leave_on_demand = remaining_vacation_including_leave_on_demand(
                     user=user, year=year, absence_allowed=user.total_absence_allowed)
+                user.holidays = user.country_code.holidays
 
         context['users'] = self.object_list
         context['year'] = year
@@ -283,6 +284,8 @@ class CalendarMonthlyView(LoginRequiredMixin, ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context['users'] = self.object_list
+        for user in self.object_list:
+            user.holidays = user.country_code.holidays
         year = self.kwargs.get('year', datetime.datetime.today().year)
         month = self.kwargs.get('month', datetime.datetime.today().month)
         context['year'] = year

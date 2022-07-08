@@ -53,6 +53,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -130,7 +131,7 @@ MICROSOFT = {
     "app_secret": env('ABSENCE_MICROSOFT_AUTH_CLIENT_SECRET'),
     "redirect": "http://localhost:8000/microsoft_authentication/callback",
     "scopes": ["user.read"],
-    "authority": "https://login.microsoftonline.com/common",  # or using tenant "https://login.microsoftonline.com/{tenant}",
+    "authority": "https://login.microsoftonline.com/common",
     "valid_email_domains": [],
     "logout_uri": "http://localhost:8000/admin/logout"
 }
@@ -153,6 +154,8 @@ APPEND_SLASH = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'), )
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATIC_ROOT = (os.path.join(BASE_DIR, 'staticfiles'))
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
