@@ -254,7 +254,8 @@ class CalendarYearlyView(LoginRequiredMixin, ListView):
                     user=user, year=year, absence_allowed=user.total_absence_allowed)
                 user.remaining_vacation_including_leave_on_demand = remaining_vacation_including_leave_on_demand(
                     user=user, year=year, absence_allowed=user.total_absence_allowed)
-                user.holidays = user.country_code.holidays
+                if user.country_code:
+                    user.holidays = user.country_code.holidays
 
         context['users'] = self.object_list
         context['year'] = year
@@ -285,7 +286,8 @@ class CalendarMonthlyView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['users'] = self.object_list
         for user in self.object_list:
-            user.holidays = user.country_code.holidays
+            if user.country_code:
+                user.holidays = user.country_code.holidays
         year = self.kwargs.get('year', datetime.datetime.today().year)
         month = self.kwargs.get('month', datetime.datetime.today().month)
         context['year'] = year
